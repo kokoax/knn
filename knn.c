@@ -4,10 +4,10 @@
 #include <limits.h>
 #include <string.h>
 
-#define AMOUNT 12     // データ量
-#define LENGTH 3      // 一データのサイズ
-#define NAME_BUF 256  // データのグループ名のバッファサイズ
-#define PERMITTED_AREA 10.0 // いわゆる K
+#define AMOUNT 150     // データ量
+#define LENGTH 4       // 一データのサイズ
+#define NAME_BUF 256   // データのグループ名のバッファサイズ
+#define K 150
 
 typedef struct data{
   char   name[NAME_BUF];
@@ -27,8 +27,11 @@ void set_answer(DATA *target, DATA data_set[AMOUNT]);
 
 void get_match_group(DATA *target);
 
-int main( void ){
-  DATA target_data ={"",{10,20,30}, 0};
+void test(void) {
+}
+
+int main(void){
+  DATA target_data ={"",{3.4,4.2,5.6,1.3}, 0};
   get_match_group(&target_data);
 
   printf("ans_name: %s\n", target_data.name);
@@ -42,18 +45,18 @@ void set_data(DATA *target, DATA data_set[AMOUNT]){
   int i, j;
   double ans = 0;
 
-  if( (fp = fopen("data.dat", "r")) == NULL){
+  if( (fp = fopen("iris.data", "r")) == NULL){
     printf("Not found data.dat");
     exit(-1);
   }
 
   for( i = 0; i < AMOUNT; i++ ){
-    fscanf(fp, "%s", data_set[i].name);
     ans = 0;
     for( j = 0; j < LENGTH; j++ ){
-      fscanf(fp, "%lf", &data_set[i].num[j]);
+      fscanf(fp, "%lf,", &data_set[i].num[j]);
       ans += pow(target->num[j]-data_set[i].num[j], 2);
     }
+    fscanf(fp, "%s", data_set[i].name);
     // ユークリッド距離
     data_set[i].result = sqrt(ans);
   }
@@ -128,35 +131,30 @@ void countup(DATA *target, DATA data_set[AMOUNT]){
     counter[i].count = 0;
   }
   // 全てのデータセットにアクセス
-  for( i = 0; i < AMOUNT; i++ ){
-    // 距離がPERMITTED_AREA以内のデータなら
-    if( data_set[i].result < PERMITTED_AREA ){
-      // セットされてるカウンタにアクセス
-      for( j = 0; j < count_amount; j++ ){
-        // カウンタに名前があるならカウントアップ
-        if( !strcmp(counter[j].name, data_set[i].name) ){
-          counter[j].count++;
-          break;
-        }
-      }
-      // カウンターにまだない名前なら新たに追加
-      if( j == count_amount ){
-        count_amount++;
+  for( i = 0; i < K; i++ ){
+    // セットされてるカウンタにアクセス
+    for( j = 0; j < count_amount; j++ ){
+      // カウンタに名前があるならカウントアップ
+      if( !strcmp(counter[j].name, data_set[i].name) ){
         counter[j].count++;
-        strcpy(counter[j].name, data_set[i].name);
+        break;
       }
-    } else {
-      // sortした後のデータセットなので距離が範囲外なら見る必要なし
-      break;
+    }
+    // カウンターにまだない名前なら新たに追加
+    if( j == count_amount ){
+      count_amount++;
+      counter[j].count++;
+      strcpy(counter[j].name, data_set[i].name);
     }
   }
   // 範囲内に最も出現数が多いものをtargetにset
+  printf("resultNum: %d\n", count_amount);
   for( i = 0; i < count_amount; i++ ){
     if( counter[i].count > max ){
       max = counter[i].count;
       max_index = i;
-      printf("name: %s count: %d\n", counter[i].name, counter[i].count);
     }
+    printf("result name: %s count: %d\n", counter[i].name, counter[i].count);
   }
   strcpy(target->name, counter[max_index].name);
 }
@@ -167,7 +165,6 @@ void set_answer(DATA *target, DATA data_set[AMOUNT]){
     // 最も近いグループ名をtarget.nameにせっと
     strcpy(target->name, data_set[min_index(data_set)].name);
   } else if( flg == 1 ){
-    // PERMITTED_AREA以内の距離のものの中で最も出現するグループ名をtarget.nameにセット
     countup(target, data_set);
   }
 }
