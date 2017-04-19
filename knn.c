@@ -4,10 +4,14 @@
 #include <limits.h>
 #include <string.h>
 
-#define AMOUNT 150     // データ量
+#define AMOUNT 75     // データ量
 #define LENGTH 4       // 一データのサイズ
 #define NAME_BUF 256   // データのグループ名のバッファサイズ
-#define K 150
+#ifndef K
+  #define K 5
+#endif
+
+#define FILE_NAME "input/odd.data"
 
 typedef struct data{
   char   name[NAME_BUF];
@@ -27,14 +31,45 @@ void set_answer(DATA *target, DATA data_set[AMOUNT]);
 
 void get_match_group(DATA *target);
 
+int is_answer(DATA *target){
+  char ans_name[NAME_BUF];
+  strcpy(ans_name, target->name);
+  get_match_group(target);
+  // printf("%s == %s\n", ans_name, target->name);
+  if( !strcmp(ans_name, target->name) ){
+    return 0;
+  }
+  return 1;
+}
+
 void test(void) {
+  FILE *fp;
+  int i,j;
+  DATA targets[75];
+  double match_num = 0;
+
+  fp = fopen("input/even.data", "r");
+  for( i = 0; i < 75; i++ ){
+    for( j = 0; j < LENGTH; j++ ){
+      fscanf(fp, "%lf,", &targets[i].num[j]);
+    }
+    fscanf(fp, "%s", targets[i].name);
+    if( !is_answer(&targets[i]) ){
+      match_num += 1;
+    } else {
+      // printf("Missing!!\n");
+    }
+  }
+  printf("K=%2d  %.0lf / %d = %lf\n", K, match_num, 75, match_num/75);
+  fclose(fp);
 }
 
 int main(void){
-  DATA target_data ={"",{3.4,4.2,5.6,1.3}, 0};
-  get_match_group(&target_data);
+  test();
+  // DATA target_data ={"",{3.4,4.2,5.6,1.3}, 0};
+  // get_match_group(&target_data);
 
-  printf("ans_name: %s\n", target_data.name);
+  // printf("ans_name: %s\n", target_data.name);
 
   return 0;
 }
@@ -45,7 +80,7 @@ void set_data(DATA *target, DATA data_set[AMOUNT]){
   int i, j;
   double ans = 0;
 
-  if( (fp = fopen("iris.data", "r")) == NULL){
+  if( (fp = fopen(FILE_NAME, "r")) == NULL){
     printf("Not found data.dat");
     exit(-1);
   }
@@ -102,7 +137,7 @@ int min_index(DATA data_set[AMOUNT]){
   int min_i = 0;
 
   for( i = 0; i < AMOUNT; i++ ){
-    printf("%lf < %lf\n", i, data_set[i].result, min_i, data_set[min_i].result);
+    // printf("%lf < %lf\n", i, data_set[i].result, min_i, data_set[min_i].result);
     if( i != min_i ){
       if( data_set[i].result < data_set[min_i].result ){
         min = data_set[i].result;
@@ -120,11 +155,11 @@ void countup(DATA *target, DATA data_set[AMOUNT]){
   int max       = 0;
   int max_index = 0;
   // 連想配列のまねごと
-  struct {
+  struct hash_like {
     char name[NAME_BUF];
     int count;
-  } counter[count_buf];
-
+  };
+  struct hash_like counter[count_buf];
   // 初期化
   for( i = 0; i < count_buf; i++ ){
     counter[i].name[0] = '\0';
@@ -147,15 +182,27 @@ void countup(DATA *target, DATA data_set[AMOUNT]){
       strcpy(counter[j].name, data_set[i].name);
     }
   }
+
+  for( i = 0; i < count_amount-1; i++ ){
+    for( j = i+1; j < count_amount; j++ ){
+      if(strcmp(counter[i].name, counter[j].name) > 0){
+        struct hash_like tmp = counter[i];
+        counter[i] = counter[j];
+        counter[j] = tmp;
+      }
+    }
+  }
+
   // 範囲内に最も出現数が多いものをtargetにset
-  printf("resultNum: %d\n", count_amount);
+  // printf("resultNum: %d\n", count_amount);
   for( i = 0; i < count_amount; i++ ){
     if( counter[i].count > max ){
       max = counter[i].count;
       max_index = i;
     }
-    printf("result name: %s count: %d\n", counter[i].name, counter[i].count);
+    // printf("result name: %s count: %d\n", counter[i].name, counter[i].count);
   }
+  // printf("\n");
   strcpy(target->name, counter[max_index].name);
 }
 
@@ -180,7 +227,7 @@ void get_match_group(DATA *target){
   sort(data_set);
 
   // 確認
-  show_result(data_set);
+  // show_result(data_set);
   // どのグループに属するかをtarget.nameにセット
   set_answer(target, data_set);
 }

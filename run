@@ -1,0 +1,16 @@
+#!/bin/ruby
+# coding: utf-8
+
+out = ""
+
+(75/3).times { |i|
+  `gcc -D"K=#{i*3+1}" -o knn knn.c -lm`
+  out += `./knn`.gsub(/\R/,", ")
+  `gcc -D"K=#{i*3+2}" -o knn knn.c -lm`
+  out += `./knn`.gsub(/\R/,", ")
+  `gcc -D"K=#{i*3+3}" -o knn knn.c -lm`
+  out += `./knn`
+}
+
+puts out
+
