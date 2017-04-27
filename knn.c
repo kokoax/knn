@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define AMOUNT 75     // データ量
-#define LENGTH 4       // 一データのサイズ
+#define LENGTH 4       // 1データのサイズ
 #define NAME_BUF 256   // データのグループ名のバッファサイズ
 #ifndef K
   #define K 5
@@ -60,7 +60,8 @@ void test(void) {
       // printf("Missing!!\n");
     }
   }
-  printf("K=%2d  %.0lf / %d = %lf\n", K, match_num, 75, match_num/75);
+  // printf("K=%2d  %.0lf / %d = %lf\n", K, match_num, 75, match_num/75);
+  printf("%.1d %lf\n", K, match_num/75);
   fclose(fp);
 }
 

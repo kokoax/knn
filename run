@@ -3,14 +3,20 @@
 
 out = ""
 
-(75/3).times { |i|
-  `gcc -D"K=#{i*3+1}" -o knn knn.c -lm`
-  out += `./knn`.gsub(/\R/,", ")
-  `gcc -D"K=#{i*3+2}" -o knn knn.c -lm`
-  out += `./knn`.gsub(/\R/,", ")
-  `gcc -D"K=#{i*3+3}" -o knn knn.c -lm`
-  out += `./knn`
+75.times { |i|
+  `gcc -D"K=#{i+1}" -o knn knn.c -lm`
+   out = `./knn`
+   puts out
 }
 
-puts out
+# (75/3).times { |i|
+#   `gcc -D"K=#{i+1}" -o knn knn.c -lm`
+#   out = `./knn`.gsub(/\R/,", ")
+#   `gcc -D"K=#{25+i+1}" -o knn knn.c -lm`
+#   out += `./knn`.gsub(/\R/,", ")
+#   `gcc -D"K=#{50+i+1}" -o knn knn.c -lm`
+#   out += `./knn`
+#   puts out
+# }
+
 
